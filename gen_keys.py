@@ -4,6 +4,7 @@ import eth_account
 import os
 
 def sign_message(challenge, filename="secret_key.txt"):
+def sign_message(challenge, filename="secret_key.txt"):
     """
     challenge - byte string
     filename - filename of the file that contains your account secret key
@@ -16,20 +17,23 @@ def sign_message(challenge, filename="secret_key.txt"):
         key = f.readlines()
     assert(len(key) > 0), "Your account secret_key.txt is empty"
 
+    # Extract the private key from the file
+    private_key = key[0].strip()
+
     w3 = Web3()
     message = encode_defunct(challenge)
 
-    # TODO recover your account information for your private key and sign the given challenge
-    # Use the code from the signatures assignment to sign the given challenge
-    
+    # Recover your account information for your private key
+    account = eth_account.Account.from_key(private_key)
+    eth_addr = account.address
 
+    # Sign the given challenge
+    signed_message = account.sign_message(message)
 
+    # Verify the signature
+    assert eth_account.Account.recover_message(message, signature=signed_message.signature.hex()) == eth_addr, f"Failed to sign message properly"
 
-
-
-    assert eth_account.Account.recover_message(message,signature=signed_message.signature.hex()) == eth_addr, f"Failed to sign message properly"
-
-    #return signed_message, account associated with the private key
+    # Return signed_message and account associated with the private key
     return signed_message, eth_addr
 
 
